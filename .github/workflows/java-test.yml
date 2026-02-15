@@ -11,29 +11,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # تحميل الكود
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # تثبيت Java
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # تحميل ملفات JUnit 4 و Hamcrest
       - name: Download JUnit 4 and Hamcrest
         run: |
           wget https://repo1.maven.org/maven2/junit/junit/4.13.2/junit-4.13.2.jar
           wget https://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar
 
-      # تجميع كل ملفات Java
       - name: Compile Java
         run: |
-          javac -cp .:junit-4.13.2.jar:hamcrest-core-1.3.jar **/*.java
+          mkdir -p out
+          javac -d out -cp junit-4.13.2.jar:hamcrest-core-1.3.jar $(find . -name "*.java")
 
-      # تشغيل الاختبارات
       - name: Run tests
         run: |
-          java -cp .:junit-4.13.2.jar:hamcrest-core-1.3.jar org.junit.runner.JUnitCore $(find . -name "*Test.class" | sed 's|./||;s|/|.|g' | sed 's|.class||')
+          java -cp "out:junit-4.13.2.jar:hamcrest-core-1.3.jar" org.junit.runner.JUnitCore $(find out -name "*Test.class" | sed 's|out/||;s|/|.|g;s|.class||')
